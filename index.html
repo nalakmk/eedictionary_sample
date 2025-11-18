@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>교과서 단어 완전 정복 (최종)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Noto+Sans+KR:wght@400;700&display=swap');
+        
+        :root {
+            --bg-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            --primary-color: #ff6b81;
+            --secondary-color: #6a5af9;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --correct-color: #20bf6b;
+            --incorrect-color: #fa8231;
+            --border-radius: 24px;
+            --shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Poppins', 'Noto Sans KR', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-color);
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #app-container {
+            width: 100%; max-width: 450px; height: 100vh; max-height: 900px;
+            background: #fff; border-radius: var(--border-radius);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            overflow: hidden; display: flex; flex-direction: column; position: relative;
+        }
+
+        #home-screen {
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            height: 100%; padding: 30px; text-align: center; overflow-y: auto;
+        }
+        #home-screen h1 { font-size: 2.2em; margin-bottom: 10px; color: var(--secondary-color); }
+        #home-screen p { margin-bottom: 30px; color: #666; }
+        
+        .input-group { margin-bottom: 30px; width: 100%; }
+        #user-name {
+            width: 100%; padding: 15px; font-size: 1.2em;
+            border: 2px solid #ddd; border-radius: 15px;
+            text-align: center; outline: none; transition: 0.3s;
+        }
+        #user-name:focus { border-color: var(--secondary-color); }
+
+        .lesson-btn {
+            width: 100%; padding: 22px; margin-bottom: 15px;
+            background: white; border: 2px solid #f0f0f0; border-radius: 20px;
+            font-size: 1.2em; font-weight: 700; color: #555;
+            cursor: pointer; transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+        }
+        .lesson-btn:hover {
+            border-color: var(--secondary-color); transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(106, 90, 249, 0.2);
+        }
+        .lesson-btn span { font-size: 0.8em; color: #999; font-weight: normal; }
+
+        #quiz-interface { display: none; flex-direction: column; height: 100%; }
+
+        #quiz-header { padding: 15px 25px; display: flex; align-items: center; gap: 15px; background: #fff; z-index: 10; }
+        #home-btn { background: none; border: none; font-size: 1.5em; cursor: pointer; }
+        #progress-bar-container { flex-grow: 1; background-color: #f0f0f0; border-radius: 10px; height: 10px; overflow: hidden; }
+        #progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, var(--secondary-color), var(--primary-color)); transition: width 0.3s ease; }
+        
+        #quiz-body { flex-grow: 1; padding: 25px; overflow-y: auto; padding-bottom: 60px; }
+
+        .card {
+            background: var(--card-bg); border-radius: var(--border-radius);
+            padding: 30px 20px; box-shadow: var(--shadow);
+            text-align: center; margin-bottom: 20px; border: 1px solid #f0f0f0;
+        }
+        #question-text { font-size: 1.4em; font-weight: 600; line-height: 1.5; color: #2c3e50; word-break: keep-all; }
+        
+        .option-btn {
+            width: 100%; background-color: #fff; border: 2px solid #f0f0f0;
+            border-radius: 18px; padding: 18px; font-size: 1.1em; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; text-align: left; margin-bottom: 12px;
+        }
+        .option-btn:hover:not(:disabled) { border-color: var(--secondary-color); background-color: #f4f4ff; }
+        .option-btn.correct { border-color: var(--correct-color); background-color: #eafff2; color: var(--correct-color); }
+        .option-btn.incorrect { border-color: var(--incorrect-color); background-color: #fff5eb; color: var(--incorrect-color); animation: shake 0.4s; }
+        
+        .record-btn {
+            background: var(--secondary-color); color: white; border: none;
+            padding: 16px; font-size: 1.1em; font-weight: 600; border-radius: 16px;
+            cursor: pointer; width: 100%; margin-top: 20px;
+            box-shadow: 0 6px 20px rgba(106, 90, 249, 0.3);
+            animation: pulse 2s infinite;
+        }
+        .record-btn.listening { background-color: var(--primary-color); animation: none; }
+        .record-btn:disabled { background-color: #ccc; animation: none; box-shadow: none; cursor: default; }
+
+        .next-btn {
+            background: linear-gradient(45deg, var(--correct-color), #2ecc71);
+            color: white; border: none; padding: 18px; font-size: 1.2em; font-weight: 700;
+            border-radius: 16px; cursor: pointer; width: 100%; margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+        }
+
+        .submit-btn { background: linear-gradient(45deg, #6a5af9, #a8c0ff); color: white; border: none; padding: 20px; font-size: 1.3em; font-weight: 700; border-radius: 18px; cursor: pointer; width: 100%; margin-top: 20px; box-shadow: 0 5px 20px rgba(106, 90, 249, 0.4); }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 100;
+            display: flex; justify-content: center; align-items: center;
+            animation: fadeIn 0.3s;
+        }
+        .modal-content {
+            background: white; padding: 30px; border-radius: 28px;
+            width: 90%; max-width: 380px; text-align: center;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+            max-height: 80vh; overflow-y: auto;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal-content h3 { color: var(--secondary-color); margin-bottom: 20px; font-size: 1.3em; }
+        #popup-chunk-area { line-height: 2.4; margin-bottom: 25px; text-align: left; }
+        .popup-chunk {
+            display: inline-block; border-bottom: 2px dashed #bbb;
+            margin: 0 4px; padding-bottom: 3px; cursor: pointer;
+            font-size: 1.2em; font-weight: 600; color: #333;
+        }
+        .popup-chunk:hover { color: var(--secondary-color); border-bottom-color: var(--secondary-color); }
+        .popup-chunk.revealed { color: #999; border-bottom: none; cursor: default; }
+        .popup-ko { display: block; font-size: 0.9em; color: var(--primary-color); font-weight: bold; margin-top: 4px; }
+        .example-text { font-size: 1.4em; font-weight: 500; margin-bottom: 25px; line-height: 1.5; color: #444; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-5px)} 40%,80%{transform:translateX(5px)} }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(106, 90, 249, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(106, 90, 249, 0); } 100% { box-shadow: 0 0 0 0 rgba(106, 90, 249, 0); } }
+        
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    <div id="home-screen">
+        <h1 style="margin-top: 20px;">교과서 단어장</h1>
+        <p>이름을 입력하고 레슨을 선택하세요!</p>
+        
+        <div class="input-group">
+            <input type="text" id="user-name" placeholder="이름 (예: 1-6-17 서지우)">
+        </div>
+
+        <button class="lesson-btn" onclick="startLesson('L5')">
+            Lesson 5
+            <span>Love Yourself, Live Your Life (25 words)</span>
+        </button>
+        <button class="lesson-btn" onclick="startLesson('L6')">
+            Lesson 6
+            <span>A Smart Digital Life (24 words)</span>
+        </button>
+        <button class="lesson-btn" onclick="startLesson('L7')">
+            Lesson 7
+            <span>Colorful Cultures (30 words)</span>
+        </button>
+    </div>
+
+    <div id="quiz-interface">
+        <div id="quiz-header">
+            <button id="home-btn" onclick="goHome()">🏠</button>
+            <div id="progress-bar-container">
+                <div id="progress-bar"></div>
+            </div>
+        </div>
+        <div id="quiz-body"></div>
+    </div>
+</div>
+
+<script>
+    // ========================================================
+    // 🔥 URL이 여기에 삽입되었습니다!
+    // ========================================================
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLldyhv4TK17-Bhag-OQ7taJK5vxFAYMz6zLlQFv1nB9IPhC9lxbAs-D6bFZn_zC5U/exec";
+
+    // ========================================================
+    // 📚 데이터베이스: 79개 단어 전체 + 수동 청크/예시문
+    // ========================================================
+    const allLessons = {
+        // ✅ Lesson 5 (25 Words)
+        "L5": [
+            { w: "life", def: "the experience of being alive", chunks: [{en:"the experience", ko:"경험"}, {en:"of being alive", ko:"살아있는 것의"}], examples: [{sentence: "He lives a happy life.", chunks: [{en:"He lives", ko:"그는 산다"}, {en:"a happy life.", ko:"행복한 삶을"}] }] },
+            { w: "special", def: "having a quality, character, identity or use of its own", chunks: [{en:"having a quality,", ko:"특징을 가진,"}, {en:"character, identity", ko:"성격이나 정체성,"}, {en:"or use of its own", ko:"또는 그것만의 용도를"}], examples: [{sentence: "You are very special to me.", chunks: [{en:"You are", ko:"너는 ~이다"}, {en:"very special to me.", ko:"나에게 매우 특별한"}] }] },
+            { w: "career", def: "the job or series of jobs that you do during your working life", chunks: [{en:"the job", ko:"직업"}, {en:"or series of jobs", ko:"또는 일련의 직업들"}, {en:"that you do", ko:"네가 하는"}, {en:"during your working life", ko:"일하는 평생 동안"}], examples: [{sentence: "She wants a career in music.", chunks: [{en:"She wants", ko:"그녀는 원한다"}, {en:"a career in music.", ko:"음악 분야의 경력을"}] }] },
+            { w: "different", def: "not the same", chunks: [{en:"not", ko:"아닌"}, {en:"the same", ko:"똑같은 것이"}], examples: [{sentence: "My opinion is different from yours.", chunks: [{en:"My opinion is", ko:"내 의견은 ~이다"}, {en:"different from yours.", ko:"너와 다른"}] }] },
+            { w: "strong point", def: "something that someone is very good at", chunks: [{en:"something that", ko:"무언가"}, {en:"someone is very good at", ko:"누군가 매우 잘하는"}], examples: [{sentence: "Math is my strong point.", chunks: [{en:"Math is", ko:"수학은 ~이다"}, {en:"my strong point.", ko:"나의 강점"}] }] },
+            { w: "content creator", def: "someone who makes and shares original content, like videos, blogs, or photos, usually on the internet", chunks: [{en:"someone who makes", ko:"만드는 사람"}, {en:"and shares original content,", ko:"그리고 창작물을 공유하는"}, {en:"like videos or blogs,", ko:"동영상이나 블로그 같은"}, {en:"usually on the internet", ko:"주로 인터넷에서"}], examples: [{sentence: "He wants to be a content creator.", chunks: [{en:"He wants to be", ko:"그는 되고 싶어 한다"}, {en:"a content creator.", ko:"콘텐츠 제작자가"}] }] },
+            { w: "stand", def: "to be in an upright position on your feet", chunks: [{en:"to be", ko:"있는 것"}, {en:"in an upright position", ko:"똑바로 선 자세로"}, {en:"on your feet", ko:"너의 발로"}], examples: [{sentence: "Please stand in line.", chunks: [{en:"Please stand", ko:"서 주세요"}, {en:"in line.", ko:"줄을 맞춰"}] }] },
+            { w: "cool", def: "attractive or impressive", chunks: [{en:"attractive", ko:"매력적인"}, {en:"or impressive", ko:"또는 인상적인"}], examples: [{sentence: "That is a cool bike.", chunks: [{en:"That is", ko:"저것은 ~이다"}, {en:"a cool bike.", ko:"멋진 자전거"}] }] },
+            { w: "stick out", def: "to be noticeable", chunks: [{en:"to be", ko:"~인 것"}, {en:"noticeable", ko:"눈에 잘 띄는"}], examples: [{sentence: "Red colors stick out easily.", chunks: [{en:"Red colors", ko:"빨간색은"}, {en:"stick out easily.", ko:"쉽게 눈에 띈다"}] }] },
+            { w: "everywhere", def: "in all places or situations", chunks: [{en:"in all places", ko:"모든 장소"}, {en:"or situations", ko:"또는 상황에서"}], examples: [{sentence: "I looked everywhere for my keys.", chunks: [{en:"I looked everywhere", ko:"나는 모든 곳을 찾았다"}, {en:"for my keys.", ko:"내 열쇠를 찾기 위해"}] }] },
+            { w: "copy", def: "to imitate, to make something that is exactly like something else", chunks: [{en:"to imitate,", ko:"모방하는 것,"}, {en:"to make something", ko:"무언가를 만드는 것"}, {en:"that is exactly like", ko:"정확히 똑같은"}, {en:"something else", ko:"다른 것과"}], examples: [{sentence: "Don't copy my answers.", chunks: [{en:"Don't copy", ko:"베끼지 마라"}, {en:"my answers.", ko:"내 정답을"}] }] },
+            { w: "pride", def: "a feeling of self-respect", chunks: [{en:"a feeling", ko:"감정"}, {en:"of self-respect", ko:"자기 존중의 (자부심)"}], examples: [{sentence: "She took pride in her work.", chunks: [{en:"She took pride", ko:"그녀는 자부심을 가졌다"}, {en:"in her work.", ko:"그녀의 일에"}] }] },
+            { w: "believe in", def: "to have trust in the goodness or ability of someone", chunks: [{en:"to have trust", ko:"신뢰를 갖는 것"}, {en:"in the goodness or ability", ko:"선함이나 능력에 대해"}, {en:"of someone", ko:"누군가의"}], examples: [{sentence: "I believe in you.", chunks: [{en:"I believe", ko:"나는 믿는다"}, {en:"in you.", ko:"너를"}] }] },
+            { w: "advice", def: "a suggestion about what to do", chunks: [{en:"a suggestion", ko:"제안"}, {en:"about what to do", ko:"무엇을 해야 할지에 대한"}], examples: [{sentence: "Can you give me some advice?", chunks: [{en:"Can you give me", ko:"내게 줄 수 있니?"}, {en:"some advice?", ko:"조언을 좀"}] }] },
+            { w: "reach", def: "to stretch your body to touch or take something", chunks: [{en:"to stretch your body", ko:"몸을 뻗는 것"}, {en:"to touch or take something", ko:"무언가를 만지거나 잡기 위해"}], examples: [{sentence: "I cannot reach the top shelf.", chunks: [{en:"I cannot reach", ko:"나는 닿을 수 없다"}, {en:"the top shelf.", ko:"맨 위 선반에"}] }] },
+            { w: "branch", def: "a part of a tree that grows out from the trunk", chunks: [{en:"a part of a tree", ko:"나무의 일부분"}, {en:"that grows out", ko:"자라 나오는"}, {en:"from the trunk", ko:"나무 몸통에서"}], examples: [{sentence: "The bird sat on a branch.", chunks: [{en:"The bird sat", ko:"새가 앉았다"}, {en:"on a branch.", ko:"나뭇가지 위에"}] }] },
+            { w: "block", def: "to make the movement or flow difficult or impossible", chunks: [{en:"to make the movement", ko:"움직임을 만드는 것"}, {en:"difficult or impossible", ko:"어렵거나 불가능하게 (막는 것)"}], examples: [{sentence: "A big tree blocked the road.", chunks: [{en:"A big tree", ko:"큰 나무 하나가"}, {en:"blocked the road.", ko:"길을 막았다"}] }] },
+            { w: "moonlight", def: "the light of the moon", chunks: [{en:"the light", ko:"빛"}, {en:"of the moon", ko:"달의"}], examples: [{sentence: "They danced in the moonlight.", chunks: [{en:"They danced", ko:"그들은 춤을 췄다"}, {en:"in the moonlight.", ko:"달빛 아래서"}] }] },
+            { w: "clear away", def: "to remove from an area or surface", chunks: [{en:"to remove", ko:"제거하는 것"}, {en:"from an area", ko:"어떤 구역이나"}, {en:"or surface", ko:"표면으로부터"}], examples: [{sentence: "Please clear away your toys.", chunks: [{en:"Please clear away", ko:"치워 주세요"}, {en:"your toys.", ko:"너의 장난감들을"}] }] },
+            { w: "abroad", def: "in or to a foreign country or countries", chunks: [{en:"in or to", ko:"~안에 또는 ~로"}, {en:"a foreign country", ko:"외국"}], examples: [{sentence: "She wants to study abroad.", chunks: [{en:"She wants", ko:"그녀는 원한다"}, {en:"to study abroad.", ko:"해외에서 공부하기를"}] }] },
+            { w: "travel", def: "to go from one place to another, especially over a long distance", chunks: [{en:"to go", ko:"가는 것"}, {en:"from one place to another,", ko:"한 장소에서 다른 곳으로"}, {en:"especially over a long distance", ko:"특히 먼 거리를"}], examples: [{sentence: "We like to travel in summer.", chunks: [{en:"We like to travel", ko:"우리는 여행하는 것을 좋아한다"}, {en:"in summer.", ko:"여름에"}] }] },
+            { w: "vet", def: "someone who is trained to give medical care to sick animals", chunks: [{en:"someone who is trained", ko:"훈련받은 사람"}, {en:"to give medical care", ko:"치료를 해주기 위해"}, {en:"to sick animals", ko:"아픈 동물들에게"}], examples: [{sentence: "The vet helped my sick dog.", chunks: [{en:"The vet helped", ko:"그 수의사가 도왔다"}, {en:"my sick dog.", ko:"나의 아픈 개를"}] }] },
+            { w: "counselor", def: "someone who is trained to listen to people and give them advice", chunks: [{en:"someone who is trained", ko:"훈련받은 사람"}, {en:"to listen to people", ko:"사람들의 말을 듣고"}, {en:"and give them advice", ko:"그들에게 조언을 주는"}], examples: [{sentence: "I talked to a school counselor.", chunks: [{en:"I talked to", ko:"나는 이야기했다"}, {en:"a school counselor.", ko:"학교 상담사와"}] }] },
+            { w: "worry", def: "to feel anxious or concerned about something", chunks: [{en:"to feel anxious", ko:"불안함을 느끼는 것"}, {en:"or concerned", ko:"또는 걱정하는 것"}, {en:"about something", ko:"무언가에 대해"}], examples: [{sentence: "Don't worry about the test.", chunks: [{en:"Don't worry", ko:"걱정하지 마"}, {en:"about the test.", ko:"시험에 대해"}] }] },
+            { w: "happiness", def: "the state of being happy", chunks: [{en:"the state", ko:"상태"}, {en:"of being happy", ko:"행복한"}], examples: [{sentence: "Money cannot buy happiness.", chunks: [{en:"Money cannot buy", ko:"돈은 살 수 없다"}, {en:"happiness.", ko:"행복을"}] }] }
+        ],
+
+        "L6": [
+            { w: "smart", def: "able to learn and use information well", chunks: [{en:"able to learn", ko:"배울 수 있는"}, {en:"and use information well", ko:"정보를 잘 이용할 수 있는"}], examples: [{sentence: "Dolphins are very smart animals.", chunks: [{en:"Dolphins are", ko:"돌고래는 ~이다"}, {en:"very smart animals.", ko:"매우 똑똑한 동물"}] }] },
+            { w: "digital", def: "using or relating to computers and the internet", chunks: [{en:"using or relating to", ko:"이용하거나 관련된"}, {en:"computers and the internet", ko:"컴퓨터와 인터넷에"}], examples: [{sentence: "I have a digital camera.", chunks: [{en:"I have", ko:"나는 가지고 있다"}, {en:"a digital camera.", ko:"디지털 카메라를"}] }] },
+            { w: "be worried about", def: "to think about problems", chunks: [{en:"to think about", ko:"생각하는 것"}, {en:"problems", ko:"문제들에 대해"}], examples: [{sentence: "He is worried about his health.", chunks: [{en:"He is worried", ko:"그는 걱정한다"}, {en:"about his health.", ko:"그의 건강에 대해"}] }] },
+            { w: "everything", def: "all things", chunks: [{en:"all things", ko:"모든 것들"}], examples: [{sentence: "Everything is ready.", chunks: [{en:"Everything", ko:"모든 것이"}, {en:"is ready.", ko:"준비되었다"}] }] },
+            { w: "cheer", def: "to give a loud shout of approval or encouragement", chunks: [{en:"to give a loud shout", ko:"큰 소리를 지르는 것"}, {en:"of approval", ko:"승인(찬성)이나"}, {en:"or encouragement", ko:"격려의"}], examples: [{sentence: "We cheered for our team.", chunks: [{en:"We cheered", ko:"우리는 응원했다"}, {en:"for our team.", ko:"우리 팀을 위해"}] }] },
+            { w: "cookie", def: "a piece of information stored on your computer about internet documents that you have looked at", chunks: [{en:"a piece of information", ko:"정보의 조각"}, {en:"stored on your computer", ko:"네 컴퓨터에 저장된"}, {en:"about internet documents", ko:"인터넷 문서에 관한"}], examples: [{sentence: "This website uses cookies.", chunks: [{en:"This website", ko:"이 웹사이트는"}, {en:"uses cookies.", ko:"쿠키를 사용한다"}] }] },
+            { w: "website", def: "a set of pages of information on the internet about a particular subject", chunks: [{en:"a set of pages", ko:"페이지들의 집합"}, {en:"of information", ko:"정보가 담긴"}, {en:"on the internet", ko:"인터넷 상의"}], examples: [{sentence: "I visited the school website.", chunks: [{en:"I visited", ko:"나는 방문했다"}, {en:"the school website.", ko:"학교 웹사이트를"}] }] },
+            { w: "store", def: "to put or keep things in a special place for use in the future", chunks: [{en:"to put or keep things", ko:"물건을 두거나 보관하는 것"}, {en:"in a special place", ko:"특별한 장소에"}, {en:"for use in the future", ko:"미래에 사용하기 위해"}], examples: [{sentence: "Squirrels store nuts for winter.", chunks: [{en:"Squirrels store nuts", ko:"다람쥐는 견과류를 저장한다"}, {en:"for winter.", ko:"겨울을 위해"}] }] },
+            { w: "clear", def: "to remove or get rid of whatever is blocking or filling something", chunks: [{en:"to remove", ko:"제거하는 것"}, {en:"whatever is blocking", ko:"막고 있는 무엇이든"}, {en:"or filling something", ko:"또는 채우고 있는 것을"}], examples: [{sentence: "Please clear the table.", chunks: [{en:"Please clear", ko:"치워 주세요"}, {en:"the table.", ko:"식탁을"}] }] },
+            { w: "information", def: "facts about a situation, person, event, etc.", chunks: [{en:"facts about", ko:"~에 대한 사실들"}, {en:"a situation, person, event", ko:"상황, 사람, 사건 등"}], examples: [{sentence: "We need more information.", chunks: [{en:"We need", ko:"우리는 필요하다"}, {en:"more information.", ko:"더 많은 정보가"}] }] },
+            { w: "post", def: "to publish something on the Internet or in print", chunks: [{en:"to publish something", ko:"무언가를 게시하는 것"}, {en:"on the Internet", ko:"인터넷이나"}, {en:"or in print", ko:"인쇄물에"}], examples: [{sentence: "He posted a photo online.", chunks: [{en:"He posted", ko:"그는 게시했다"}, {en:"a photo online.", ko:"사진을 온라인에"}] }] },
+            { w: "footprint", def: "the mark made by a person's or animal's foot", chunks: [{en:"the mark", ko:"자국"}, {en:"made by", ko:"만들어진"}, {en:"a person's or animal's foot", ko:"사람이나 동물의 발에 의해"}], examples: [{sentence: "I saw footprints in the snow.", chunks: [{en:"I saw footprints", ko:"나는 발자국을 보았다"}, {en:"in the snow.", ko:"눈 속에서"}] }] },
+            { w: "funny", def: "describing an action or words that make you laugh", chunks: [{en:"describing", ko:"묘사하는 것"}, {en:"an action or words", ko:"행동이나 말을"}, {en:"that make you laugh", ko:"너를 웃게 만드는"}], examples: [{sentence: "The movie was very funny.", chunks: [{en:"The movie was", ko:"그 영화는 ~였다"}, {en:"very funny.", ko:"매우 재미있는"}] }] },
+            { w: "run away", def: "to leave a place or person secretly and suddenly", chunks: [{en:"to leave a place", ko:"장소를 떠나는 것"}, {en:"secretly and suddenly", ko:"비밀스럽고 갑작스럽게"}], examples: [{sentence: "The cat ran away from the dog.", chunks: [{en:"The cat ran away", ko:"고양이는 도망쳤다"}, {en:"from the dog.", ko:"개로부터"}] }] },
+            { w: "account", def: "a personal way to use a service on the internet", chunks: [{en:"a personal way", ko:"개인적인 수단"}, {en:"to use a service", ko:"서비스를 이용하기 위한"}, {en:"on the internet", ko:"인터넷에서"}], examples: [{sentence: "I logged into my email account.", chunks: [{en:"I logged into", ko:"나는 로그인했다"}, {en:"my email account.", ko:"내 이메일 계정에"}] }] },
+            { w: "forget about", def: "to be unable to remember a fact", chunks: [{en:"to be unable", ko:"할 수 없는 것"}, {en:"to remember a fact", ko:"사실을 기억하는 것을"}], examples: [{sentence: "Don't forget about the meeting.", chunks: [{en:"Don't forget", ko:"잊지 마라"}, {en:"about the meeting.", ko:"회의에 대해"}] }] },
+            { w: "type", def: "to write using a machine, either a computer keyboard or a typewriter", chunks: [{en:"to write", ko:"쓰는 것"}, {en:"using a machine,", ko:"기계를 사용하여,"}, {en:"either a keyboard or typewriter", ko:"키보드나 타자기 같은"}], examples: [{sentence: "I can type very fast.", chunks: [{en:"I can type", ko:"나는 타이핑할 수 있다"}, {en:"very fast.", ko:"매우 빠르게"}] }] },
+            { w: "address", def: "the written location of a building, place or website", chunks: [{en:"the written location", ko:"쓰여진 위치"}, {en:"of a building, place", ko:"건물, 장소"}, {en:"or website", ko:"또는 웹사이트의"}], examples: [{sentence: "What is your home address?", chunks: [{en:"What is", ko:"무엇이니?"}, {en:"your home address?", ko:"너의 집 주소가"}] }] },
+            { w: "log into", def: "to access a secure system by providing the necessary information", chunks: [{en:"to access a secure system", ko:"보안 시스템에 접속하는 것"}, {en:"by providing", ko:"제공함으로써"}, {en:"the necessary information", ko:"필요한 정보를"}], examples: [{sentence: "Log into the website first.", chunks: [{en:"Log into the website", ko:"웹사이트에 로그인해라"}, {en:"first.", ko:"먼저"}] }] },
+            { w: "print", def: "to produce writing or images on paper or other material with a machine", chunks: [{en:"to produce", ko:"생산하는 것"}, {en:"writing or images", ko:"글이나 이미지를"}, {en:"on paper", ko:"종이 위에"}], examples: [{sentence: "Can you print this paper?", chunks: [{en:"Can you print", ko:"인쇄해 줄 수 있니?"}, {en:"this paper?", ko:"이 문서를"}] }] },
+            { w: "log out of", def: "to disconnect from the particular service", chunks: [{en:"to disconnect", ko:"연결을 끊는 것"}, {en:"from the particular service", ko:"특정 서비스로부터"}], examples: [{sentence: "Don't forget to log out.", chunks: [{en:"Don't forget", ko:"잊지 마라"}, {en:"to log out.", ko:"로그아웃하는 것을"}] }] },
+            { w: "regularly", def: "with equal or similar amounts of space or time between one and the next", chunks: [{en:"with equal amounts", ko:"동등한 양으로"}, {en:"of space or time", ko:"공간이나 시간의"}, {en:"between one and the next", ko:"하나와 그 다음 사이에"}], examples: [{sentence: "You should exercise regularly.", chunks: [{en:"You should exercise", ko:"너는 운동해야 한다"}, {en:"regularly.", ko:"정기적으로"}] }] },
+            { w: "like", def: "similar to", chunks: [{en:"similar to", ko:"~와 비슷한"}], examples: [{sentence: "He swims like a fish.", chunks: [{en:"He swims", ko:"그는 수영한다"}, {en:"like a fish.", ko:"물고기처럼"}] }] },
+            { w: "never", def: "not at any time", chunks: [{en:"not", ko:"아니다"}, {en:"at any time", ko:"어떤 때에도 (결코 ~않는)"}], examples: [{sentence: "I will never do that again.", chunks: [{en:"I will never do", ko:"나는 절대 하지 않을 것이다"}, {en:"that again.", ko:"그것을 다시는"}] }] }
+        ],
+
+        "L7": [
+            { w: "colorful", def: "having bright colors or a lot of different colors", chunks: [{en:"having bright colors", ko:"밝은 색을 가진"}, {en:"or a lot of different colors", ko:"또는 많은 다양한 색을"}], examples: [{sentence: "The garden is full of colorful flowers.", chunks: [{en:"The garden is full", ko:"정원은 가득하다"}, {en:"of colorful flowers.", ko:"다채로운 꽃들로"}] }] },
+            { w: "next to", def: "beside; in or into a position right by somebody or something", chunks: [{en:"beside;", ko:"~옆에;"}, {en:"in a position right by", ko:"바로 옆 위치에"}, {en:"somebody or something", ko:"누군가 또는 무언가의"}], examples: [{sentence: "Sit next to me.", chunks: [{en:"Sit", ko:"앉아라"}, {en:"next to me.", ko:"내 옆에"}] }] },
+            { w: "in the middle of", def: "in the central point, position, or part", chunks: [{en:"in the central point,", ko:"중심 점,"}, {en:"position, or part", ko:"위치, 또는 부분에"}], examples: [{sentence: "There is a table in the middle of the room.", chunks: [{en:"There is a table", ko:"탁자가 있다"}, {en:"in the middle of the room.", ko:"방 한가운데에"}] }] },
+            { w: "samba dance", def: "a style of dance from Brazil", chunks: [{en:"a style of dance", ko:"춤의 한 스타일"}, {en:"from Brazil", ko:"브라질에서 온"}], examples: [{sentence: "They are learning the samba dance.", chunks: [{en:"They are learning", ko:"그들은 배우고 있다"}, {en:"the samba dance.", ko:"삼바 춤을"}] }] },
+            { w: "main stage", def: "the largest performing space in a place", chunks: [{en:"the largest", ko:"가장 큰"}, {en:"performing space", ko:"공연 공간"}, {en:"in a place", ko:"어떤 장소에서"}], examples: [{sentence: "The band played on the main stage.", chunks: [{en:"The band played", ko:"밴드는 연주했다"}, {en:"on the main stage.", ko:"주 무대에서"}] }] },
+            { w: "learn", def: "to get knowledge or skill in a new subject or activity", chunks: [{en:"to get knowledge", ko:"지식을 얻는 것"}, {en:"or skill", ko:"또는 기술을"}, {en:"in a new subject", ko:"새로운 과목에서"}], examples: [{sentence: "We learn English at school.", chunks: [{en:"We learn English", ko:"우리는 영어를 배운다"}, {en:"at school.", ko:"학교에서"}] }] },
+            { w: "ukulele", def: "a small guitar with four strings", chunks: [{en:"a small guitar", ko:"작은 기타"}, {en:"with four strings", ko:"네 개의 줄이 있는"}], examples: [{sentence: "She plays the ukulele well.", chunks: [{en:"She plays", ko:"그녀는 연주한다"}, {en:"the ukulele well.", ko:"우쿨렐레를 잘"}] }] },
+            { w: "festival", def: "an organized set of special events, such as musical performances or plays", chunks: [{en:"an organized set", ko:"조직된 모음"}, {en:"of special events,", ko:"특별한 행사들의"}, {en:"such as musical performances", ko:"음악 공연과 같은"}], examples: [{sentence: "The music festival starts today.", chunks: [{en:"The music festival", ko:"음악 축제가"}, {en:"starts today.", ko:"오늘 시작한다"}] }] },
+            { w: "near", def: "close and easy to get to quickly", chunks: [{en:"close", ko:"가까운"}, {en:"and easy to get to", ko:"그리고 가기 쉬운 (곳)"}], examples: [{sentence: "My house is near the park.", chunks: [{en:"My house is", ko:"우리 집은 ~이다"}, {en:"near the park.", ko:"공원 근처에"}] }] },
+            { w: "in front of", def: "in a position facing somebody or something", chunks: [{en:"in a position", ko:"위치에"}, {en:"facing somebody", ko:"누군가를 마주 보는"}], examples: [{sentence: "He stood in front of the class.", chunks: [{en:"He stood", ko:"그는 섰다"}, {en:"in front of the class.", ko:"학급 앞에"}] }] },
+            { w: "restaurant", def: "a place where you can buy and eat a meal", chunks: [{en:"a place where", ko:"장소"}, {en:"you can buy and eat", ko:"네가 사서 먹을 수 있는"}, {en:"a meal", ko:"식사를"}], examples: [{sentence: "We ate at a nice restaurant.", chunks: [{en:"We ate", ko:"우리는 먹었다"}, {en:"at a nice restaurant.", ko:"멋진 식당에서"}] }] },
+            { w: "dish", def: "food prepared as part of a meal", chunks: [{en:"food prepared", ko:"준비된 음식"}, {en:"as part of a meal", ko:"식사의 일부로"}], examples: [{sentence: "Spaghetti is my favorite dish.", chunks: [{en:"Spaghetti is", ko:"스파게티는 ~이다"}, {en:"my favorite dish.", ko:"내가 가장 좋아하는 요리"}] }] },
+            { w: "delicious", def: "having a very good taste or smell", chunks: [{en:"having a very good taste", ko:"아주 좋은 맛이 나는"}, {en:"or smell", ko:"또는 냄새가 나는"}], examples: [{sentence: "This cake is delicious.", chunks: [{en:"This cake is", ko:"이 케이크는"}, {en:"delicious.", ko:"맛있다"}] }] },
+            { w: "popular", def: "liked, enjoyed, or supported by many people", chunks: [{en:"liked, enjoyed,", ko:"좋아해지거나 즐겨지는,"}, {en:"or supported", ko:"또는 지지받는"}, {en:"by many people", ko:"많은 사람들에 의해"}], examples: [{sentence: "Soccer is a popular sport.", chunks: [{en:"Soccer is", ko:"축구는 ~이다"}, {en:"a popular sport.", ko:"인기 있는 스포츠"}] }] },
+            { w: "excited", def: "feeling very happy", chunks: [{en:"feeling", ko:"느끼는"}, {en:"very happy", ko:"매우 행복하게"}], examples: [{sentence: "The children were excited.", chunks: [{en:"The children were", ko:"아이들은 ~했다"}, {en:"excited.", ko:"신이 났다"}] }] },
+            { w: "far", def: "a long distance away", chunks: [{en:"a long distance", ko:"먼 거리"}, {en:"away", ko:"떨어져 있는"}], examples: [{sentence: "Is the station far from here?", chunks: [{en:"Is the station", ko:"역이 ~니?"}, {en:"far from here?", ko:
+"여기서 먼"}] }] },
+            { w: "behind", def: "at the back of someone or something", chunks: [{en:"at the back", ko:"뒤쪽에"}, {en:"of someone or something", ko:"누군가나 무언가의"}], examples: [{sentence: "The sun went behind the clouds.", chunks: [{en:"The sun went", ko:"해는 들어갔다"}, {en:"behind the clouds.", ko:"구름 뒤로"}] }] },
+            { w: "across", def: "from one side of something to the other", chunks: [{en:"from one side", ko:"한쪽 면에서"}, {en:"of something", ko:"무언가의"}, {en:"to the other", ko:"다른 쪽으로"}], examples: [{sentence: "Walk across the street.", chunks: [{en:"Walk", ko:"걸어라"}, {en:"across the street.", ko:"길을 건너서"}] }] },
+            { w: "Brazilian", def: "coming from or relating to Brazil", chunks: [{en:"coming from", ko:"~출신의"}, {en:"or relating to Brazil", ko:"또는 브라질과 관련된"}], examples: [{sentence: "He loves Brazilian coffee.", chunks: [{en:"He loves", ko:"그는 좋아한다"}, {en:"Brazilian coffee.", ko:"브라질 커피를"}] }] },
+            { w: "large", def: "big in size or amount", chunks: [{en:"big", ko:"큰"}, {en:"in size or amount", ko:"크기나 양에서"}], examples: [{sentence: "They live in a large house.", chunks: [{en:"They live", ko:"그들은 산다"}, {en:"in a large house.", ko:"큰 집에서"}] }] },
+            { w: "country", def: "an area of land that has its own government and laws", chunks: [{en:"an area of land", ko:"땅의 구역"}, {en:"that has its own government", ko:"자신만의 정부를 가진"}, {en:"and laws", ko:"그리고 법을"}], examples: [{sentence: "Which country are you from?", chunks: [{en:"Which country", ko:"어느 나라"}, {en:"are you from?", ko:"출신이니?"}] }] },
+            { w: "rainforest", def: "a forest with a lot of tall trees where it rains a lot", chunks: [{en:"a forest", ko:"숲"}, {en:"with a lot of tall trees", ko:"키 큰 나무가 많은"}, {en:"where it rains a lot", ko:"비가 많이 오는 곳"}], examples: [{sentence: "Many animals live in the rainforest.", chunks: [{en:"Many animals live", ko:"많은 동물이 산다"}, {en:"in the rainforest.", ko:"열대우림에"}] }] },
+            { w: "weather", def: "the temperature or conditions outside", chunks: [{en:"the temperature", ko:"기온"}, {en:"or conditions outside", ko:"또는 바깥의 상태"}], examples: [{sentence: "How is the weather today?", chunks: [{en:"How is", ko:"어때?"}, {en:"the weather today?", ko:"오늘 날씨가"}] }] },
+            { w: "warm", def: "not too hot or too cold", chunks: [{en:"not too hot", ko:"너무 덥지도 않고"}, {en:"or too cold", ko:"너무 춥지도 않은"}], examples: [{sentence: "It is warm in spring.", chunks: [{en:"It is warm", ko:"따뜻하다"}, {en:"in spring.", ko:"봄에는"}] }] },
+            { w: "capital city", def: "a city that is the center of government or a state", chunks: [{en:"a city", ko:"도시"}, {en:"that is the center", ko:"중심인"}, {en:"of government", ko:"정부의"}], examples: [{sentence: "Seoul is the capital city of Korea.", chunks: [{en:"Seoul is", ko:"서울은 ~이다"}, {en:"the capital city of Korea.", ko:"한국의 수도"}] }] },
+            { w: "famous", def: "known by many people", chunks: [{en:"known", ko:"알려진"}, {en:"by many people", ko:"많은 사람들에 의해"}], examples: [{sentence: "He is a famous singer.", chunks: [{en:"He is", ko:"그는 ~이다"}, {en:"a famous singer.", ko:"유명한 가수"}] }] },
+            { w: "carnival", def: "a public festival that happens at a regular time each year", chunks: [{en:"a public festival", ko:"공공 축제"}, {en:"that happens", ko:"일어나는"}, {en:"at a regular time", ko:"정기적인 때에"}], examples: [{sentence: "People wear masks at the carnival.", chunks: [{en:"People wear masks", ko:"사람들은 가면을 쓴다"}, {en:"at the carnival.", ko:"카니발에서"}] }] },
+            { w: "parade", def: "a large number of people walking or riding on vehicles, going in the same direction as part of a public celebration", chunks: [{en:"a large number of people", ko:"많은 수의 사람들"}, {en:"walking or riding", ko:"걷거나 타고 있는"}, {en:"going in the same direction", ko:"같은 방향으로 가는"}], examples: [{sentence: "We watched the street parade.", chunks: [{en:"We watched", ko:"우리는 지켜봤다"}, {en:"the street parade.", ko:"거리 퍼레이드를"}] }] },
+            { w: "enjoy", def: "to get pleasure from something", chunks: [{en:"to get pleasure", ko:"기쁨을 얻는 것"}, {en:"from something", ko:"무언가로부터"}], examples: [{sentence: "I enjoy reading books.", chunks: [{en:"I enjoy", ko:"나는 즐긴다"}, {en:"reading books.", ko:"책 읽는 것을"}] }] },
+            { w: "graph", def: "a drawing that shows how two sets of information are related, usually by lines or curves", chunks: [{en:"a drawing that shows", ko:"보여주는 그림"}, {en:"how two sets of information", ko:"두 정보 집합이"}, {en:"are related", ko:"어떻게 관련되는지"}], examples: [{sentence: "Look at this line graph.", chunks: [{en:"Look at", ko:"보세요"}, {en:"this line graph.", ko:"이 꺾은선 그래프를"}] }] }
+        ]
+    };
+
+    // ========================================================
+    // 🔧 유틸리티: 데이터 가공 (옵션 생성)
+    // ========================================================
+    function processData(rawList) {
+        return rawList.map(item => {
+            const allWords = rawList.map(i => i.w);
+            const wrongOptions = allWords.filter(w => w !== item.w).sort(() => 0.5 - Math.random()).slice(0, 2);
+            const options = [item.w, ...wrongOptions].sort(() => 0.5 - Math.random());
+            return {
+                type: item.type || 'word',
+                answer: item.w,
+                definition: item.def,
+                translationChunks: item.chunks, 
+                options: options,
+                examples: item.examples 
+            };
+        });
+    }
+
+    // 전역 변수
+    let currentLessonData = [];
+    let currentIndex = 0;
+    let userName = "";
+    let selectedLevel = "";
+    let startTime, endTime; 
+
+    const quizBody = document.getElementById('quiz-body');
+    const progressBar = document.getElementById('progress-bar');
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+    if(recognition) {
+        recognition.continuous = false;
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+    }
+
+    function startLesson(key) {
+        const nameInput = document.getElementById('user-name');
+        if (!nameInput.value.trim()) {
+            alert("이름을 입력해주세요! 😊");
+            nameInput.focus();
+            return;
+        }
+        
+        userName = nameInput.value.trim();
+        selectedLevel = key;
+        currentLessonData = processData(allLessons[key]);
+        currentIndex = 0;
+        startTime = new Date(); 
+
+        document.getElementById('home-screen').style.display = 'none';
+        document.getElementById('quiz-interface').style.display = 'flex';
+        loadQuestion();
+    }
+
+    function goHome() {
+        document.getElementById('quiz-interface').style.display = 'none';
+        document.getElementById('home-screen').style.display = 'flex';
+    }
+
+    function loadQuestion() {
+        const q = currentLessonData[currentIndex];
+        const progress = ((currentIndex) / currentLessonData.length) * 100;
+        progressBar.style.width = `${progress}%`;
+
+        quizBody.innerHTML = `
+            <div class="card fade-in" id="main-card">
+                <p style="color:#888; font-size:0.9em; margin-bottom:5px;">Quiz ${currentIndex + 1}/${currentLessonData.length}</p>
+                <p id="question-text">${q.definition}</p>
+            </div>
+            <div id="options-box" class="fade-in"></div>
+            <div id="flow-container"></div>
+        `;
+
+        const optionsBox = document.getElementById('options-box');
+        q.options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.textContent = opt;
+            btn.onclick = () => checkAnswer(btn, opt);
+            optionsBox.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(btn, selected) {
+        const q = currentLessonData[currentIndex];
+        if (selected === q.answer) {
+            document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+            btn.classList.add('correct');
+            
+            const card = document.getElementById('main-card');
+            const recordBtn = document.createElement('button');
+            recordBtn.className = 'record-btn';
+            recordBtn.textContent = '🎤 영영풀이 따라 읽기';
+            card.appendChild(recordBtn);
+            
+            speak(q.definition);
+            
+            recordBtn.onclick = () => {
+                startRecording(recordBtn, () => {
+                    showChunkPopup(q.definition, q.translationChunks, () => {
+                         const flow = document.getElementById('flow-container');
+                         const nextBtn = document.createElement('button');
+                         nextBtn.className = 'next-btn';
+                         nextBtn.textContent = '예시문 보기 ➡️';
+                         nextBtn.onclick = () => {
+                             document.getElementById('main-card').remove();
+                             document.getElementById('options-box').remove();
+                             flow.innerHTML = '';
+                             showExample(0);
+                         };
+                         flow.appendChild(nextBtn);
+                         nextBtn.scrollIntoView({behavior: "smooth"});
+                    });
+                });
+            };
+        } else {
+            btn.classList.add('incorrect');
+            setTimeout(() => btn.classList.remove('incorrect'), 500);
+        }
+    }
+
+    function showExample(idx) {
+        const q = currentLessonData[currentIndex];
+        if (!q.examples || idx >= q.examples.length) {
+            finishQuestion();
+            return;
+        }
+        const ex = q.examples[idx];
+        const popupId = `ex-popup-${idx}`;
+        const html = `
+        <div class="modal-overlay" id="${popupId}">
+            <div class="modal-content">
+                <h3>Example (${idx+1}/${q.examples.length})</h3>
+                <p class="example-text">${ex.sentence}</p>
+                <button class="record-btn">🎤 따라 읽기</button>
+            </div>
+        </div>`;
+        document.body.insertAdjacentHTML('beforeend', html);
+        speak(ex.sentence);
+        const popup = document.getElementById(popupId);
+        const btn = popup.querySelector('.record-btn');
+        btn.onclick = () => {
+            startRecording(btn, () => {
+                popup.remove();
+                showChunkPopup(ex.sentence, ex.chunks, () => {
+                    showExample(idx + 1);
+                });
+            });
+        };
+    }
+
+    function showChunkPopup(text, chunks, callback) {
+        let revealed = 0;
+        const popupId = 'chunk-' + Date.now();
+        let chunkHTML = chunks.map((c, i) => `
+            <div style="display:inline-block; margin:5px;">
+                <span class="popup-chunk" id="${popupId}-c-${i}">${c.en}</span>
+                <span class="popup-ko hidden" id="${popupId}-k-${i}">${c.ko}</span>
+            </div>
+        `).join(' ');
+
+        const html = `
+        <div class="modal-overlay" id="${popupId}">
+            <div class="modal-content">
+                <h3>의미 확인</h3>
+                <div id="popup-chunk-area">${chunkHTML}</div>
+                <button class="record-btn hidden" id="${popupId}-btn">🎤 다시 읽고 닫기</button>
+            </div>
+        </div>`;
+        document.body.insertAdjacentHTML('beforeend', html);
+
+        const popup = document.getElementById(popupId);
+        const finalBtn = document.getElementById(`${popupId}-btn`);
+
+        chunks.forEach((_, i) => {
+            const el = document.getElementById(`${popupId}-c-${i}`);
+            const ko = document.getElementById(`${popupId}-k-${i}`);
+            el.onclick = () => {
+                if (!el.classList.contains('revealed')) {
+                    el.classList.add('revealed');
+                    ko.classList.remove('hidden');
+                    revealed++;
+                    if (revealed === chunks.length) finalBtn.classList.remove('hidden');
+                }
+            };
+        });
+        finalBtn.onclick = () => {
+            startRecording(finalBtn, () => {
+                popup.remove();
+                if (callback) callback();
+            });
+        };
+    }
+
+    function finishQuestion() {
+        const btn = document.createElement('button');
+        btn.className = 'next-btn';
+        btn.textContent = '다음 문제! 🚀';
+        btn.onclick = () => {
+            currentIndex++;
+            if (currentIndex < currentLessonData.length) {
+                loadQuestion();
+            } else {
+                showFinalResult();
+            }
+        };
+        quizBody.appendChild(btn);
+    }
+
+    function showFinalResult() {
+        endTime = new Date();
+        const timeDiff = endTime - startTime; 
+        const seconds = Math.floor((timeDiff / 1000) % 60);
+        const minutes = Math.floor((timeDiff / (1000 * 60)) % 60);
+        const timeString = `${minutes}분 ${seconds}초`;
+
+        progressBar.style.width = '100%';
+        quizBody.innerHTML = `
+            <div style="text-align:center; padding:40px;">
+                <h1 style="font-size:3em; margin-bottom:10px;">🎉</h1>
+                <h2 style="color:#333; margin-bottom:10px;">참 잘했어요!</h2>
+                <p style="font-size:1.2em; margin-bottom:30px;">
+                    <strong style="color:${'var(--secondary-color)'};">${userName}</strong>님<br>
+                    레벨: ${selectedLevel}<br>
+                    걸린 시간: <strong style="color:${'var(--primary-color)'};">${timeString}</strong>
+                </p>
+                
+                <button class="submit-btn" onclick="sendData('${timeString}', this)">
+                    선생님께 기록 보내기 📮
+                </button>
+                <button class="next-btn" onclick="goHome()" style="margin-top:15px; background:#777;">홈으로</button>
+            </div>
+        `;
+    }
+
+    function sendData(timeString, btn) {
+        if(!GOOGLE_SCRIPT_URL) {
+            alert("전송 URL이 설정되지 않았습니다. (HTML 코드 확인 필요)");
+            return;
+        }
+
+        btn.textContent = "전송 중...";
+        btn.disabled = true;
+
+        const data = {
+            name: userName,
+            level: selectedLevel,
+            time: timeString
+        };
+
+        const formData = new FormData();
+        formData.append("name", data.name);
+        formData.append("level", data.level);
+        formData.append("time", data.time);
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors', 
+            body: formData
+        }).then(() => {
+            btn.style.background = "#20bf6b";
+            btn.textContent = "전송 완료! ✅";
+            alert("기록이 선생님께 전송되었습니다!");
+        }).catch(err => {
+            btn.textContent = "전송 실패 😢";
+            alert("전송에 실패했습니다. 인터넷 연결을 확인하세요.");
+            btn.disabled = false;
+        });
+    }
+
+    function startRecording(btn, onSuccess) {
+        if (!recognition) {
+            alert("음성 인식을 지원하지 않는 브라우저입니다.");
+            return;
+        }
+        btn.disabled = true;
+        btn.classList.add('listening');
+        btn.textContent = "👂 듣고 있어요...";
+        
+        let success = false;
+        const timer = setTimeout(() => {
+            recognition.stop();
+            if (!success) {
+                btn.classList.remove('listening');
+                btn.textContent = "인식 실패 (눌러서 패스)";
+                btn.disabled = false;
+                btn.onclick = onSuccess; 
+            }
+        }, 7000);
+
+        recognition.onresult = () => {
+            success = true;
+            clearTimeout(timer);
+            btn.classList.remove('listening');
+            btn.textContent = "✅ 성공!";
+            setTimeout(onSuccess, 500);
+        };
+        recognition.onerror = () => {
+            success = true; 
+            clearTimeout(timer);
+            btn.classList.remove('listening');
+            btn.textContent = "오류 (다시 시도)";
+            btn.disabled = false;
+        };
+        recognition.start();
+    }
+
+    function speak(text) {
+        speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'en-US';
+        u.rate = 0.9;
+        speechSynthesis.speak(u);
+    }
+</script>
+</body>
+</html>
