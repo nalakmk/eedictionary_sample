@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>교과서 단어 완전 정복 (L5~L8)</title>
+    <title>교과서 단어 완전 정복</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Noto+Sans+KR:wght@400;700&display=swap');
         
         :root {
-            --bg-gradient: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
-            --primary-color: #005bea;
-            --secondary-color: #00c6fb;
+            --bg-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            --primary-color: #ff6b81;
+            --secondary-color: #6a5af9;
             --card-bg: #ffffff;
             --text-color: #333;
             --correct-color: #20bf6b;
             --incorrect-color: #fa8231;
             --border-radius: 24px;
-            --shadow: 0 10px 30px rgba(0,0,0,0.15);
+            --shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,7 +32,7 @@
         #app-container {
             width: 100%; max-width: 450px; height: 100vh; max-height: 900px;
             background: #fff; border-radius: var(--border-radius);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
             overflow: hidden; display: flex; flex-direction: column; position: relative;
         }
 
@@ -40,10 +40,10 @@
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             height: 100%; padding: 30px; text-align: center; overflow-y: auto;
         }
-        #home-screen h1 { font-size: 2.2em; margin-bottom: 10px; color: var(--primary-color); }
+        #home-screen h1 { font-size: 2.2em; margin-bottom: 10px; color: var(--secondary-color); }
         #home-screen p { margin-bottom: 30px; color: #666; }
         
-        .input-group { margin-bottom: 20px; width: 100%; }
+        .input-group { margin-bottom: 30px; width: 100%; }
         #user-name {
             width: 100%; padding: 15px; font-size: 1.2em;
             border: 2px solid #ddd; border-radius: 15px;
@@ -52,18 +52,18 @@
         #user-name:focus { border-color: var(--secondary-color); }
 
         .lesson-btn {
-            width: 100%; padding: 20px; margin-bottom: 12px;
-            background: white; border: 2px solid #f0f0f0; border-radius: 18px;
-            font-size: 1.1em; font-weight: 700; color: #555;
+            width: 100%; padding: 22px; margin-bottom: 15px;
+            background: white; border: 2px solid #f0f0f0; border-radius: 20px;
+            font-size: 1.2em; font-weight: 700; color: #555;
             cursor: pointer; transition: all 0.2s;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             display: flex; flex-direction: column; align-items: center; gap: 4px;
         }
         .lesson-btn:hover {
             border-color: var(--secondary-color); transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 198, 251, 0.2);
+            box-shadow: 0 8px 20px rgba(106, 90, 249, 0.2);
         }
-        .lesson-btn span { font-size: 0.85em; color: #888; font-weight: normal; }
+        .lesson-btn span { font-size: 0.8em; color: #999; font-weight: normal; }
 
         #quiz-interface { display: none; flex-direction: column; height: 100%; }
 
@@ -79,12 +79,12 @@
             padding: 30px 20px; box-shadow: var(--shadow);
             text-align: center; margin-bottom: 20px; border: 1px solid #f0f0f0;
         }
-        #question-text { font-size: 1.3em; font-weight: 600; line-height: 1.5; color: #2c3e50; word-break: keep-all; }
+        #question-text { font-size: 1.4em; font-weight: 600; line-height: 1.5; color: #2c3e50; word-break: keep-all; }
         
         .option-btn {
             width: 100%; background-color: #fff; border: 2px solid #f0f0f0;
-            border-radius: 18px; padding: 16px; font-size: 1.1em; font-weight: 600;
-            cursor: pointer; transition: all 0.2s; text-align: left; margin-bottom: 10px;
+            border-radius: 18px; padding: 18px; font-size: 1.1em; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; text-align: left; margin-bottom: 12px;
         }
         .option-btn:hover:not(:disabled) { border-color: var(--secondary-color); background-color: #f4f4ff; }
         .option-btn.correct { border-color: var(--correct-color); background-color: #eafff2; color: var(--correct-color); }
@@ -94,7 +94,7 @@
             background: var(--secondary-color); color: white; border: none;
             padding: 16px; font-size: 1.1em; font-weight: 600; border-radius: 16px;
             cursor: pointer; width: 100%; margin-top: 20px;
-            box-shadow: 0 6px 20px rgba(0, 198, 251, 0.3);
+            box-shadow: 0 6px 20px rgba(106, 90, 249, 0.3);
             animation: pulse 2s infinite;
         }
         .record-btn.listening { background-color: var(--primary-color); animation: none; }
@@ -137,7 +137,7 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
         @keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-5px)} 40%,80%{transform:translateX(5px)} }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0, 198, 251, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(0, 198, 251, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 198, 251, 0); } }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(106, 90, 249, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(106, 90, 249, 0); } 100% { box-shadow: 0 0 0 0 rgba(106, 90, 249, 0); } }
         
         .hidden { display: none !important; }
     </style>
@@ -183,17 +183,14 @@
 </div>
 
 <script>
-    // 🔥 구글 앱스 스크립트 URL
+    // 🔥 선생님의 구글 앱스 스크립트 URL
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLldyhv4TK17-Bhag-OQ7taJK5vxFAYMz6zLlQFv1nB9IPhC9lxbAs-D6bFZn_zC5U/exec";
 
     // ========================================================
-    // 📚 데이터베이스 (L5, L6, L7, L8)
+    // 📚 데이터베이스: Lesson 5, 6, 7, 8 전체 단어 (총 113개)
     // ========================================================
     const allLessons = {
-        // ... (L5, L6, L7 데이터는 기존과 동일하므로 공간 절약을 위해 생략, 아래 L8 추가됨)
-        // 실제 파일에는 L5, L6, L7 데이터가 모두 포함되어 있어야 합니다. 
-        // 여기서는 L8 데이터를 중점적으로 보여드립니다.
-        
+        // ✅ Lesson 5 (25 Words)
         "L5": [
             { w: "life", def: "the experience of being alive", chunks: [{en:"the experience", ko:"경험"}, {en:"of being alive", ko:"살아있는 것의"}], examples: [{sentence: "He lives a happy life.", chunks: [{en:"He lives", ko:"그는 산다"}, {en:"a happy life.", ko:"행복한 삶을"}] }] },
             { w: "special", def: "having a quality, character, identity or use of its own", chunks: [{en:"having a quality,", ko:"특징을 가진,"}, {en:"character, identity", ko:"성격이나 정체성,"}, {en:"or use of its own", ko:"또는 그것만의 용도를"}], examples: [{sentence: "You are very special to me.", chunks: [{en:"You are", ko:"너는 ~이다"}, {en:"very special to me.", ko:"나에게 매우 특별한"}] }] },
@@ -221,6 +218,8 @@
             { w: "worry", def: "to feel anxious or concerned about something", chunks: [{en:"to feel anxious", ko:"불안함을 느끼는 것"}, {en:"or concerned", ko:"또는 걱정하는 것"}, {en:"about something", ko:"무언가에 대해"}], examples: [{sentence: "Don't worry about the test.", chunks: [{en:"Don't worry", ko:"걱정하지 마"}, {en:"about the test.", ko:"시험에 대해"}] }] },
             { w: "happiness", def: "the state of being happy", chunks: [{en:"the state", ko:"상태"}, {en:"of being happy", ko:"행복한"}], examples: [{sentence: "Money cannot buy happiness.", chunks: [{en:"Money cannot buy", ko:"돈은 살 수 없다"}, {en:"happiness.", ko:"행복을"}] }] }
         ],
+
+        // ✅ Lesson 6 (24 Words)
         "L6": [
             { w: "smart", def: "able to learn and use information well", chunks: [{en:"able to learn", ko:"배울 수 있는"}, {en:"and use information well", ko:"정보를 잘 이용할 수 있는"}], examples: [{sentence: "Dolphins are very smart animals.", chunks: [{en:"Dolphins are", ko:"돌고래는 ~이다"}, {en:"very smart animals.", ko:"매우 똑똑한 동물"}] }] },
             { w: "digital", def: "using or relating to computers and the internet", chunks: [{en:"using or relating to", ko:"이용하거나 관련된"}, {en:"computers and the internet", ko:"컴퓨터와 인터넷에"}], examples: [{sentence: "I have a digital camera.", chunks: [{en:"I have", ko:"나는 가지고 있다"}, {en:"a digital camera.", ko:"디지털 카메라를"}] }] },
@@ -247,6 +246,8 @@
             { w: "like", def: "similar to", chunks: [{en:"similar to", ko:"~와 비슷한"}], examples: [{sentence: "He swims like a fish.", chunks: [{en:"He swims", ko:"그는 수영한다"}, {en:"like a fish.", ko:"물고기처럼"}] }] },
             { w: "never", def: "not at any time", chunks: [{en:"not", ko:"아니다"}, {en:"at any time", ko:"어떤 때에도 (결코 ~않는)"}], examples: [{sentence: "I will never do that again.", chunks: [{en:"I will never do", ko:"나는 절대 하지 않을 것이다"}, {en:"that again.", ko:"그것을 다시는"}] }] }
         ],
+
+        // ✅ Lesson 7 (30 Words)
         "L7": [
             { w: "colorful", def: "having bright colors or a lot of different colors", chunks: [{en:"having bright colors", ko:"밝은 색을 가진"}, {en:"or a lot of different colors", ko:"또는 많은 다양한 색을"}], examples: [{sentence: "The garden is full of colorful flowers.", chunks: [{en:"The garden is full", ko:"정원은 가득하다"}, {en:"of colorful flowers.", ko:"다채로운 꽃들로"}] }] },
             { w: "next to", def: "beside; in or into a position right by somebody or something", chunks: [{en:"beside;", ko:"~옆에;"}, {en:"in a position right by", ko:"바로 옆 위치에"}, {en:"somebody or something", ko:"누군가 또는 무언가의"}], examples: [{sentence: "Sit next to me.", chunks: [{en:"Sit", ko:"앉아라"}, {en:"next to me.", ko:"내 옆에"}] }] },
@@ -280,7 +281,7 @@
             { w: "graph", def: "a drawing that shows how two sets of information are related, usually by lines or curves", chunks: [{en:"a drawing that shows", ko:"보여주는 그림"}, {en:"how two sets of information", ko:"두 정보 집합이"}, {en:"are related", ko:"어떻게 관련되는지"}], examples: [{sentence: "Look at this line graph.", chunks: [{en:"Look at", ko:"보세요"}, {en:"this line graph.", ko:"이 꺾은선 그래프를"}] }] }
         ],
 
-        // ✅ Lesson 8 (34 Words) - [NEW]
+        // ✅ Lesson 8 (34 Words)
         "L8": [
             { w: "green", def: "relating to the protection of the environment", chunks: [{en:"relating to", ko:"~와 관련된"}, {en:"the protection", ko:"보호"}, {en:"of the environment", ko:"환경의"}], examples: [{sentence: "We should use green energy.", chunks: [{en:"We should use", ko:"우리는 사용해야 한다"}, {en:"green energy.", ko:"친환경 에너지를"}] }] },
             { w: "save", def: "to stop someone or something from being used up, killed, injured, or destroyed", chunks: [{en:"to stop someone or something", ko:"누군가나 무언가를 막는 것"}, {en:"from being used up", ko:"다 써버리는 것으로부터"}, {en:"or destroyed", ko:"또는 파괴되는 것으로부터"}], examples: [{sentence: "Save water to help the earth.", chunks: [{en:"Save water", ko:"물을 아껴라"}, {en:"to help the earth.", ko:"지구를 돕기 위해"}] }] },
@@ -319,7 +320,6 @@
         ]
     };
 
-    // 전역 변수 및 함수들 (변경 없음)
     function processData(rawList) {
         return rawList.map(item => {
             const allWords = rawList.map(i => i.w);
@@ -359,13 +359,11 @@
             nameInput.focus();
             return;
         }
-        
         userName = nameInput.value.trim();
         selectedLevel = key;
         currentLessonData = processData(allLessons[key]);
         currentIndex = 0;
         startTime = new Date(); 
-
         document.getElementById('home-screen').style.display = 'none';
         document.getElementById('quiz-interface').style.display = 'flex';
         loadQuestion();
@@ -380,7 +378,6 @@
         const q = currentLessonData[currentIndex];
         const progress = ((currentIndex) / currentLessonData.length) * 100;
         progressBar.style.width = `${progress}%`;
-
         quizBody.innerHTML = `
             <div class="card fade-in" id="main-card">
                 <p style="color:#888; font-size:0.9em; margin-bottom:5px;">Quiz ${currentIndex + 1}/${currentLessonData.length}</p>
@@ -389,7 +386,6 @@
             <div id="options-box" class="fade-in"></div>
             <div id="flow-container"></div>
         `;
-
         const optionsBox = document.getElementById('options-box');
         q.options.forEach(opt => {
             const btn = document.createElement('button');
@@ -405,15 +401,12 @@
         if (selected === q.answer) {
             document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
             btn.classList.add('correct');
-            
             const card = document.getElementById('main-card');
             const recordBtn = document.createElement('button');
             recordBtn.className = 'record-btn';
             recordBtn.textContent = '🎤 영영풀이 따라 읽기';
             card.appendChild(recordBtn);
-            
             speak(q.definition);
-            
             recordBtn.onclick = () => {
                 startRecording(recordBtn, () => {
                     showChunkPopup(q.definition, q.translationChunks, () => {
@@ -477,7 +470,6 @@
                 <span class="popup-ko hidden" id="${popupId}-k-${i}">${c.ko}</span>
             </div>
         `).join(' ');
-
         const html = `
         <div class="modal-overlay" id="${popupId}">
             <div class="modal-content">
@@ -487,10 +479,8 @@
             </div>
         </div>`;
         document.body.insertAdjacentHTML('beforeend', html);
-
         const popup = document.getElementById(popupId);
         const finalBtn = document.getElementById(`${popupId}-btn`);
-
         chunks.forEach((_, i) => {
             const el = document.getElementById(`${popupId}-c-${i}`);
             const ko = document.getElementById(`${popupId}-k-${i}`);
@@ -532,7 +522,6 @@
         const seconds = Math.floor((timeDiff / 1000) % 60);
         const minutes = Math.floor((timeDiff / (1000 * 60)) % 60);
         const timeString = `${minutes}분 ${seconds}초`;
-
         progressBar.style.width = '100%';
         quizBody.innerHTML = `
             <div style="text-align:center; padding:40px;">
@@ -543,7 +532,6 @@
                     레벨: ${selectedLevel}<br>
                     걸린 시간: <strong style="color:${'var(--primary-color)'};">${timeString}</strong>
                 </p>
-                
                 <button class="submit-btn" onclick="sendData('${timeString}', this)">
                     선생님께 기록 보내기 📮
                 </button>
@@ -557,21 +545,13 @@
             alert("전송 URL이 설정되지 않았습니다.");
             return;
         }
-
         btn.textContent = "전송 중...";
         btn.disabled = true;
-
-        const data = {
-            name: userName,
-            level: selectedLevel,
-            time: timeString
-        };
-
+        const data = { name: userName, level: selectedLevel, time: timeString };
         const formData = new FormData();
         formData.append("name", data.name);
         formData.append("level", data.level);
         formData.append("time", data.time);
-
         fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors', 
@@ -595,7 +575,6 @@
         btn.disabled = true;
         btn.classList.add('listening');
         btn.textContent = "👂 듣고 있어요...";
-        
         let success = false;
         const timer = setTimeout(() => {
             recognition.stop();
@@ -606,7 +585,6 @@
                 btn.onclick = onSuccess; 
             }
         }, 7000);
-
         recognition.onresult = () => {
             success = true;
             clearTimeout(timer);
